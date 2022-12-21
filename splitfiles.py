@@ -1,5 +1,6 @@
 import nltk
 import os
+import pandas
 import pdfplumber
 import fileinput
 import tkinter as tk     # from tkinter import Tk for Python 3.x
@@ -7,7 +8,9 @@ from tkinter.filedialog import askopenfilename,askdirectory
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from nltk import ne_chunk, pos_tag, word_tokenize, sent_tokenize
 from nltk.tree import Tree
+import time
 
+df= pandas.read_excel('./Pasta1.xlsx',usecols = 'B')
 
 
 def pdf_get_name (page, pdf_file):
@@ -28,11 +31,11 @@ def pdf_get_name (page, pdf_file):
   name = ''
   
   for text in pdf_text:
-        nltk_results = ne_chunk(pos_tag(word_tokenize(text)))
-        for nltk_result in nltk_results:
-            print(nltk_result)
+              for index,row in df.iterrows():
+                if row['FUNCIONÁRIO'].lower() in text.lower():
+                  name=row['FUNCIONÁRIO'] 
  
- 
+  print(name)
   return name
   
 
@@ -46,28 +49,38 @@ def pdf_sep (pdf_file, out_dir):
 
     #Cria dois objetos, o primeiro da classe PdfFileReader para leitura e o segundo, da classe PdfFileWriter, para escrita
     pdf_content = PdfFileReader(pdf_file)
-    pdf_writer = PdfFileWriter()
+    
 
     #Armazena o quantidade de páginas do pdf original
     num_pages = pdf_content.getNumPages()
     
     #Faz uma iteração para cada uma das páginas
     for page in range(num_pages):
-      
+      pdf_writer = PdfFileWriter()
       #Adiciona a página da iteração atual ao objeto para escrita do PDF
       pdf_writer.addPage(pdf_content.getPage(page))
-
+      
       #Invoca a função pdf_get_name para extrair o nome contido na página atual
-      pdf_get_name(page,pdf_file)
+      pdf_name = pdf_get_name(page,pdf_file)
+
+      #O médoto os.path.join() une o caminho para gravação, o nome e a extesão do arquivo pdf. 
+      pdf_out = os.path.join(out_dir, pdf_name +'.pdf')
+
+      #Grava o objeto de escrita no arquivo
+      with open(pdf_out, 'wb') as pdf_named:
+        pdf_writer.write(pdf_named)
+
+      
+      
      
 
 #Testando as funções
 
-#root = tk.Tk()
-#root.withdraw() # we don't want a full GUI, so keep the root window from appearing
-#path = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+root = tk.Tk()
+root.withdraw() # we don't want a full GUI, so keep the root window from appearing
+path = askopenfilename(defaultextension=".pdf",filetypes=[('pdf file', '*.pdf')]) # show an "Open" dialog box and return the path to the selected file
 
-#root.withdraw()
-#out_dir = askdirectory()
+root.withdraw()
+out_dir = askdirectory()
 
-pdf_sep('C:/Users/gustavo.veiga/Downloads/holerite.pdf','C:/Users/gustavo.veiga/Desktop/files')
+pdf_sep(path,out_dir)
