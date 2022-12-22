@@ -11,6 +11,8 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 
 df= pandas.read_excel('./Pasta1.xlsx',usecols = 'B')
 
+path = ''
+out_dir = ''
 
 def pdf_get_name (page, pdf_file):
 
@@ -44,6 +46,8 @@ def pdf_sep (pdf_file, out_dir):
   pdf_file é o caminho do pdf original
   out_dir é a pasta onde os pdfs divididos serão salvos
   '''
+
+  
   #Abre o pdf original no modo de leitura
   with open(pdf_file, 'rb') as pdf:
 
@@ -65,7 +69,7 @@ def pdf_sep (pdf_file, out_dir):
       pdf_name = pdf_get_name(page,pdf_file)
     
       #O médoto os.path.join() une o caminho para gravação, o nome e a extesão do arquivo pdf. 
-      pdf_out = os.path.join(out_dir, pdf_name +'.pdf')
+      pdf_out = os.path.join(out_dir, pdf_name + options.get()+'.pdf')
 
       #Grava o objeto de escrita no arquivo
       with open(pdf_out, 'wb') as pdf_named:
@@ -73,15 +77,34 @@ def pdf_sep (pdf_file, out_dir):
 
       
       
-     
+def choose_file_folder():
+    global path
+    global out_dir     
+    path = askopenfilename(defaultextension=".pdf",filetypes=[('pdf file', '*.pdf')]) # show an "Open" dialog box and return the path to the selected file
+
+    out_dir = askdirectory()
 
 #Testando as funções
 
-root = tk.Tk()
-root.withdraw() # we don't want a full GUI, so keep the root window from appearing
-path = askopenfilename(defaultextension=".pdf",filetypes=[('pdf file', '*.pdf')]) # show an "Open" dialog box and return the path to the selected file
-if path != '':
-  root.withdraw()
-  out_dir = askdirectory()
-  if out_dir != '':
-    pdf_sep(path,out_dir)
+choose_file_folder()
+
+my_w = tk.Tk()
+my_w.geometry("350x200")  # Size of the window 
+my_w.title("www.plus2net.com")  # Adding a title
+
+options = tk.StringVar(my_w)
+options.set("_Pagamento") # default value
+
+l1 = tk.Label(my_w,  text='Select One', width=10 )  
+l1.grid(row=2,column=1) 
+om1 =tk.OptionMenu(my_w, options, '_Pagamento','_Adiantamento','_13º_1ª_Parcela','13º_2ª_Parcela','_PLR','_Demonstrativo_de_Rendimento','')
+om1.grid(row=3,column=1) 
+
+b1= tk.Button(my_w, text ="SEPARAR ARQUIVOS", command = lambda: pdf_sep(path,out_dir) )
+b1.grid(row=4,column=1)
+
+b2= tk.Button(my_w, text ="TROCAR ARQUIVO E PASTA", command = lambda: choose_file_folder() )
+b2.grid(row=5,column=1)  
+
+
+my_w.mainloop()
