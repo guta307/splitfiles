@@ -1,0 +1,35 @@
+splitfiles.spec
+build/splitfiles/COLLECT-00.toc
+build/splitfiles/Analysis-00.toc
+build/splitfiles/base_library.zip
+build/splitfiles/EXE-00.toc
+build/splitfiles/PKG-00.toc
+build/splitfiles/PYZ-00.pyz
+build/splitfiles/PYZ-00.toc
+build/splitfiles/splitfiles.exe.manifest
+build/splitfiles/splitfiles.exe
+build/splitfiles/splitfiles.pkg
+build/splitfiles/Tree-00.toc
+build/splitfiles/Tree-01.toc
+build/splitfiles/Tree-02.toc
+build/splitfiles/warn-splitfiles.txt
+build/splitfiles/xref-splitfiles.html
+build/splitfiles/localpycs/pyimod02_importers.pyc
+build/splitfiles/localpycs/pyimod01_archive.pyc
+build/splitfiles/localpycs/pyimod03_ctypes.pyc
+build/splitfiles/localpycs/struct.pyc
+build/splitfiles/localpycs/pyimod04_pywin32.pyc
+dist/splitfiles (2).zip
+dist/Pasta1.xlsx
+dist/splitfiles.exe
+dist/splitfiles.zip
+files/Alessandro Antunes de Freitas .pdf
+files/Eduardo Gomes dos Santos.pdf
+files/Leandro Ferreira da Silva.pdf
+files/Juliano de Andrade Alves .pdf
+files/nome_desconhecido [0].pdf
+files/Raphael Felipe de Andrade.pdf
+files/Rodrigo Silvestrini.pdf
+files/nome_desconhecido [0].pdf
+files/nome_desconhecido [0].pdf
+files/nome_desconhecido [0].pdf
