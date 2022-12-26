@@ -2,17 +2,47 @@
 import os
 import pandas
 import pdfplumber
-from charset_normalizer import md__mypyc
 import tkinter as tk     # from tkinter import Tk for Python 3.x
 from tkinter import simpledialog
 from tkinter.filedialog import askopenfilename,askdirectory
 from PyPDF2 import PdfFileWriter, PdfFileReader
-
-
+from playwright.sync_api import sync_playwright
+from os import walk
+import time
 df= pandas.read_excel('./Pasta1.xlsx',usecols = 'B')
 
 path = ''
 out_dir = ''
+
+def uploadFile():
+
+    f = []
+    path= []
+    for (dirpath, dirnames, filenames) in walk(out_dir):
+        f = filenames
+        path=[dirpath]
+  
+    with sync_playwright() as p:
+        navegador = p.chromium.launch(headless=False)
+        pagina = navegador.new_page()
+        pagina.goto('https://www.engecomp.ind.br/area-do-colaborador/manager/')
+        pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[1]/input', "Karla")
+        pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[2]/input',"KARLA1020")
+        pagina.locator('xpath=/html/body/div/div/div/div/div[1]/div/form/div[3]/div[1]/button').click()
+
+        time.sleep(2)
+        pagina.locator('xpath=//html/body/div[2]/div[1]/nav/ul/li[5]/a').click()
+        pagina.locator('xpath=/html/body/div[2]/div[1]/nav/ul/li[5]/ul/li[1]/a').click()
+        
+        time.sleep(2)
+
+        pagina.fill('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/div[2]/label/input', "ADEMILTON DOS SANTOasdasdasdO")
+        try:
+          pagina.locator('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/table/tbody/tr/td[5]/a').click(timeout=2000)
+        except:
+          print('error')
+
+        time.sleep(2)
 
 def pdf_get_name (page, pdf_file):
 
@@ -104,7 +134,10 @@ b1= tk.Button(my_w, text ="SEPARAR ARQUIVOS", command = lambda: pdf_sep(path,out
 b1.grid(row=4,column=1)
 
 b2= tk.Button(my_w, text ="TROCAR ARQUIVO E PASTA", command = lambda: choose_file_folder() )
-b2.grid(row=5,column=1)  
+b2.grid(row=5,column=1)
+
+b2= tk.Button(my_w, text ="Upload arquivos", command = lambda: uploadFile() )
+b2.grid(row=6,column=1)  
 
 
 my_w.mainloop()
