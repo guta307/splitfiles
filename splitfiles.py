@@ -6,58 +6,63 @@ import tkinter as tk     # from tkinter import Tk for Python 3.x
 from tkinter import simpledialog
 from tkinter.filedialog import askopenfilename,askdirectory
 from PyPDF2 import PdfFileWriter, PdfFileReader
-from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright
 from os import walk
 import time
+from pathlib import Path
 import asyncio
 df= pandas.read_excel('./Pasta1.xlsx',usecols = 'B')
 
 path = ''
 out_dir = ''
 
-async def uploadFile():
+def uploadFile():
 
     f = []
     path= []
     for (dirpath, dirnames, filenames) in walk(out_dir):
         f = filenames
-        path=[dirpath]
+    
+        path=dirpath
     print(path)
-    async with async_playwright() as p:
-        navegador = await p.chromium.launch(headless=False)
-        pagina = await navegador.new_page()
-        await pagina.goto('https://www.engecomp.ind.br/area-do-colaborador/manager/')
-        await pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[1]/input', "Karla")
-        await pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[2]/input',"KARLA1020")
-        await pagina.locator('xpath=/html/body/div/div/div/div/div[1]/div/form/div[3]/div[1]/button').click()
+    with sync_playwright() as p:
+        navegador =  p.firefox.launch()
+        pagina =  navegador.new_page()
+        pagina.goto('https://www.engecomp.ind.br/area-do-colaborador/manager/')
+        pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[1]/input', "Karla")
+        pagina.fill('xpath=/html/body/div/div/div/div/div[1]/div/form/div[2]/input',"KARLA1020")
+        pagina.locator('xpath=/html/body/div/div/div/div/div[1]/div/form/div[3]/div[1]/button').click()
 
         time.sleep(2)
-        await pagina.locator('xpath=//html/body/div[2]/div[1]/nav/ul/li[5]/a').click()
-        await pagina.locator('xpath=/html/body/div[2]/div[1]/nav/ul/li[5]/ul/li[1]/a').click()
+        pagina.locator('xpath=//html/body/div[2]/div[1]/nav/ul/li[5]/a').click()
+        pagina.locator("text="+ company.get()+"").click()
         
         time.sleep(2)
         for file in filenames:
           name = file.replace('_Pagamento.pdf','')
           name = name.replace('_Adiantamento.pdf','')
           name = name.replace('_13º_1ª_Parcela.pdf','')
-          name = name.replace('13º_2ª_Parcela.pdf','')
+          name = name.replace('_13º_2ª_Parcela.pdf','')
           name = name.replace('_PLR.pdf','')
           name = name.replace('_Demonstrativo_de_Rendimento.pdf','')
+          name = name.replace('_Vale_Transporte.pdf','')
           name = name.replace('.pdf','')
+          name = name.replace('_',' ')
           print(name)
-          await pagina.fill('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/div[2]/label/input', name)
+          pagina.fill('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/div[2]/label/input', name)
           try:
-            await pagina.locator('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/table/tbody/tr/td[5]/a').click(timeout=2000)
-            time.sleep(2)
-            await pagina.locator('xpath=/html/body/div[2]/main/div/div/ul/li[2]/a').click(timeout=2000)
-            
-            with await pagina.expect_file_chooser() as file_chooser:
-              await pagina.locator('xpath=/html/body/div[2]/main/div/div/div/div[3]/div[1]/div').click(timeout=2000) 
-              file_chooser.value.setFiles(""+dirpath[0]+"/"+file+"")
+             pagina.locator('xpath=/html/body/div[2]/main/div/div/div[2]/div[2]/div/table/tbody/tr/td[5]/a').click(timeout=2000)
+             time.sleep(2)
+             pagina.locator('xpath=/html/body/div[2]/main/div/div/ul/li[2]/a').click(timeout=2000)
 
-
-            await pagina.go_back()
-            time.sleep(2)
+             with  pagina.expect_file_chooser() as fc_info:
+               pagina.locator('xpath=/html/body/div[2]/main/div/div/div/div[3]/div[1]').click(timeout=2000)
+             file_chooser = fc_info.value
+             file_chooser.set_files(""+dirpath+"/"+file+"")
+             os.remove(""+dirpath+"/"+file+"")
+             time.sleep(5)
+             pagina.go_back()
+             time.sleep(2)
           except Exception as e: 
            print(e)
 
@@ -115,7 +120,7 @@ def pdf_sep (pdf_file, out_dir):
       pdf_writer.addPage(pdf_content.getPage(page))
       
       #Invoca a função pdf_get_name para extrair o nome contido na página atual
-      pdf_name = pdf_get_name(page,pdf_file)
+      pdf_name = pdf_get_name(page,pdf_file).replace(" ","_")
     
       #O médoto os.path.join() une o caminho para gravação, o nome e a extesão do arquivo pdf. 
       pdf_out = os.path.join(out_dir, pdf_name + options.get()+'.pdf')
@@ -143,14 +148,14 @@ choose_file_folder()
 
 my_w = tk.Tk()
 my_w.geometry("350x200")  # Size of the window 
-my_w.title("www.plus2net.com")  # Adding a title
+my_w.title("ENGECOMP")  # Adding a title
 
 options = tk.StringVar(my_w)
 options.set("_Pagamento") # default value
 
-l1 = tk.Label(my_w,  text='Select One', width=10 )  
+l1 = tk.Label(my_w,  text='tipo de arquivo', width=10 )  
 l1.grid(row=2,column=1) 
-om1 =tk.OptionMenu(my_w, options, '_Pagamento','_Adiantamento','_13º_1ª_Parcela','13º_2ª_Parcela','_PLR','_Demonstrativo_de_Rendimento','')
+om1 =tk.OptionMenu(my_w, options, '_Pagamento','_Adiantamento','_13º_1ª_Parcela','_13º_2ª_Parcela','_PLR','_Demonstrativo_de_Rendimento','_Vale_Transporte','')
 om1.grid(row=3,column=1) 
 
 b1= tk.Button(my_w, text ="SEPARAR ARQUIVOS", command = lambda: pdf_sep(path,out_dir) )
@@ -159,8 +164,17 @@ b1.grid(row=4,column=1)
 b2= tk.Button(my_w, text ="TROCAR ARQUIVO E PASTA", command = lambda: choose_file_folder() )
 b2.grid(row=5,column=1)
 
-b2= tk.Button(my_w, text ="Upload arquivos", command = lambda: callUploadFunction())
-b2.grid(row=6,column=1)  
+company = tk.StringVar(my_w)
+company.set("ENGECOMP COMERCIO DE MATERIAIS E SERVICOS EIRELI") # default value
+
+
+l1 = tk.Label(my_w,  text='Empresa', width=10 )  
+l1.grid(row=6,column=1) 
+om1 =tk.OptionMenu(my_w, company, 'ENGECOMP COMERCIO DE MATERIAIS E SERVICOS EIRELI','ENGECOMP FACILITIES E MANUTENCAO INDUSTRIAL EIRELI','ENGECOMP INSTALACOES INDUSTRIAIS ERELI','ENGECOMP MANUTENCAO INDUSTRIAL','ENGECOMP MONTAGENS E SERVIÇOS INDUSTRIAIS','ENGECOMP SERVICOS INDUSTRIAIS EIRELI (FILIAL)','ENGECOMP SERVICOS INDUSTRIAIS EIRELI (MATRIZ)','PJ')
+om1.grid(row=7,column=1) 
+
+b2= tk.Button(my_w, text ="Upload arquivos", command = lambda: uploadFile())
+b2.grid(row=8,column=1)  
 
 
 my_w.mainloop()
